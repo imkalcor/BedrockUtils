@@ -133,18 +133,12 @@ pub struct Array<'a, B: Binary<'a>, P: Prefix> {
 }
 
 impl<'a, B: Binary<'a>, P: Prefix> Array<'a, B, P> {
-    /// Returns a new instance of the array.
     pub fn new(array: Vec<B>) -> Self {
         Self {
             array,
             phantom: PhantomData,
             _lifetime: &(),
         }
-    }
-
-    /// Returns the length of the array
-    pub fn len(&self) -> usize {
-        self.array.len()
     }
 }
 
