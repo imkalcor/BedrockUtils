@@ -113,7 +113,7 @@ pub fn binary_derive(item: TokenStream) -> Result<TokenStream> {
                 impl #impl_generics ::binary::Binary<#lifetime> for #name #ty_generics
                 #where_clause
                 {
-                    fn serialize(&self, buf: &mut BytesMut) {
+                    fn serialize(&self, buf: &mut impl Write) {
                         use bytes::BytesMut;
                         use ::binary::Binary;
 
@@ -296,7 +296,7 @@ pub fn binary_derive(item: TokenStream) -> Result<TokenStream> {
                 impl #impl_generics ::binary::Binary<#lifetime> for #name #ty_generics
                 #where_clause
                 {
-                    fn serialize(&self, buf: &mut BytesMut) {
+                    fn serialize(&self, buf: &mut impl Write) {
                         use bytes::BytesMut;
                         use ::binary::Binary;
                         use ::binary::datatypes::{I8, U8, I16, U16, I32, U32, VarI32, VarU32};

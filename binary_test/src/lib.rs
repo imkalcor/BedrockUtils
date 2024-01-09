@@ -8,7 +8,7 @@ fn test_conditional() {
     use binary_derive::Binary;
     use byteorder::LE;
     use bytes::BytesMut;
-    use std::io::Cursor;
+    use std::io::{Cursor, Write};
 
     #[derive(Binary)]
     struct Test {
@@ -42,7 +42,10 @@ fn test_serde() {
     use binary_derive::Binary;
     use byteorder::{BE, LE};
     use bytes::BytesMut;
-    use std::io::Cursor;
+    use std::env;
+    use std::io::{Cursor, Write};
+
+    env::set_var("RUST_BACKTRACE", "1");
 
     #[derive(Binary)]
     struct Test<'a> {
@@ -62,6 +65,8 @@ fn test_serde() {
     };
 
     ser.serialize(&mut bytes);
+
+    println!("{:?}", bytes.to_vec());
 
     let mut reader = Cursor::new(&bytes[..]);
     let de = Test::deserialize(&mut reader).unwrap();

@@ -1,8 +1,7 @@
 use crate::Binary;
 use byteorder::ByteOrder;
 use byteorder::{ReadBytesExt, WriteBytesExt};
-use bytes::{Buf, BytesMut};
-use std::io::{Cursor, Error, ErrorKind, Read, Result, Write};
+use std::io::{Cursor, Error, ErrorKind, Result, Write};
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -143,7 +142,7 @@ impl VarU64 {
 }
 
 impl<'a> Binary<'a> for Bool {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u8(self.0 as u8).unwrap()
     }
 
@@ -154,7 +153,7 @@ impl<'a> Binary<'a> for Bool {
 }
 
 impl<'a> Binary<'a> for U8 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u8(self.0).unwrap()
     }
 
@@ -165,7 +164,7 @@ impl<'a> Binary<'a> for U8 {
 }
 
 impl<'a> Binary<'a> for I8 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_i8(self.0).unwrap()
     }
 
@@ -176,7 +175,7 @@ impl<'a> Binary<'a> for I8 {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for U16<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u16::<E>(self.0).unwrap();
     }
 
@@ -187,7 +186,7 @@ impl<'a, E: ByteOrder> Binary<'a> for U16<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for I16<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_i16::<E>(self.0).unwrap();
     }
 
@@ -198,7 +197,7 @@ impl<'a, E: ByteOrder> Binary<'a> for I16<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for U24<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u24::<E>(self.0).unwrap();
     }
 
@@ -209,7 +208,7 @@ impl<'a, E: ByteOrder> Binary<'a> for U24<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for I24<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_i24::<E>(self.0).unwrap();
     }
 
@@ -220,7 +219,7 @@ impl<'a, E: ByteOrder> Binary<'a> for I24<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for U32<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u32::<E>(self.0).unwrap();
     }
 
@@ -231,7 +230,7 @@ impl<'a, E: ByteOrder> Binary<'a> for U32<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for I32<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_i32::<E>(self.0).unwrap();
     }
 
@@ -242,7 +241,7 @@ impl<'a, E: ByteOrder> Binary<'a> for I32<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for U64<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_u64::<E>(self.0).unwrap();
     }
 
@@ -253,7 +252,7 @@ impl<'a, E: ByteOrder> Binary<'a> for U64<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for I64<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_i64::<E>(self.0).unwrap();
     }
 
@@ -264,7 +263,7 @@ impl<'a, E: ByteOrder> Binary<'a> for I64<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for F32<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_f32::<E>(self.0).unwrap();
     }
 
@@ -275,7 +274,7 @@ impl<'a, E: ByteOrder> Binary<'a> for F32<E> {
 }
 
 impl<'a, E: ByteOrder> Binary<'a> for F64<E> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         buf.write_f64::<E>(self.0).unwrap();
     }
 
@@ -285,21 +284,8 @@ impl<'a, E: ByteOrder> Binary<'a> for F64<E> {
     }
 }
 
-impl<'a> Binary<'a> for BytesMut {
-    fn serialize(&self, buf: &mut BytesMut) {
-        buf.write_all(&self).unwrap()
-    }
-
-    fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
-        let mut vec = BytesMut::zeroed(buf.remaining());
-        buf.read_exact(&mut vec)?;
-
-        Ok(vec)
-    }
-}
-
 impl<'a> Binary<'a> for VarI32 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let u = self.0;
         let mut ux = (self.0 as u32) << 1;
 
@@ -340,7 +326,7 @@ impl<'a> Binary<'a> for VarI32 {
 }
 
 impl<'a> Binary<'a> for VarU32 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let mut u = self.0;
 
         while u >= 0x80 {
@@ -371,7 +357,7 @@ impl<'a> Binary<'a> for VarU32 {
 }
 
 impl<'a> Binary<'a> for VarI64 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let u = self.0;
         let mut ux = (self.0 as u64) << 1;
 
@@ -412,7 +398,7 @@ impl<'a> Binary<'a> for VarI64 {
 }
 
 impl<'a> Binary<'a> for VarU64 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let mut u = self.0;
 
         while u >= 0x80 {
@@ -443,7 +429,7 @@ impl<'a> Binary<'a> for VarU64 {
 }
 
 impl<'a, B: Binary<'a>> Binary<'a> for Option<B> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         match self {
             Some(val) => {
                 Bool::new(true).serialize(buf);

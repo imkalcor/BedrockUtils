@@ -1,9 +1,7 @@
 pub mod datatypes;
 pub mod prefixed;
 
-use std::io::{Cursor, Result};
-
-use bytes::BytesMut;
+use std::io::{Cursor, Result, Write};
 
 ///
 /// Binary trait is implemented for all the data types, structs or enums that can be
@@ -16,6 +14,6 @@ use bytes::BytesMut;
 /// coming from the other end is in the format we expect.
 ///
 pub trait Binary<'a>: Sized {
-    fn serialize(&self, buf: &mut BytesMut);
+    fn serialize(&self, buf: &mut impl Write);
     fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self>;
 }

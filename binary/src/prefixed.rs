@@ -1,7 +1,7 @@
 use crate::datatypes::{VarI32, VarU32, I16, I32, U16, U32};
 use crate::Binary;
 use byteorder::ByteOrder;
-use bytes::{Buf, BytesMut};
+use bytes::Buf;
 use std::io::{Cursor, Result, Write};
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
@@ -9,12 +9,12 @@ use std::ops::{Deref, DerefMut};
 /// Prefix trait is implemented for the numeric data types that can be used
 /// to encode the length of prefixed objects like Arrays, Vectors, Strings, etc.
 pub trait Prefix {
-    fn encode(size: usize, buf: &mut BytesMut);
+    fn encode(size: usize, buf: &mut impl Write);
     fn decode<'a>(buf: &mut Cursor<&'a [u8]>) -> Result<usize>;
 }
 
 impl<E: ByteOrder> Prefix for U16<E> {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as u16;
         U16::<E>::new(val).serialize(buf);
     }
@@ -26,7 +26,7 @@ impl<E: ByteOrder> Prefix for U16<E> {
 }
 
 impl<E: ByteOrder> Prefix for I16<E> {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as i16;
         I16::<E>::new(val).serialize(buf);
     }
@@ -38,7 +38,7 @@ impl<E: ByteOrder> Prefix for I16<E> {
 }
 
 impl<E: ByteOrder> Prefix for I32<E> {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as i32;
         I32::<E>::new(val).serialize(buf);
     }
@@ -50,7 +50,7 @@ impl<E: ByteOrder> Prefix for I32<E> {
 }
 
 impl<E: ByteOrder> Prefix for U32<E> {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as u32;
         U32::<E>::new(val).serialize(buf);
     }
@@ -62,7 +62,7 @@ impl<E: ByteOrder> Prefix for U32<E> {
 }
 
 impl Prefix for VarI32 {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as i32;
         VarI32::new(val).serialize(buf);
     }
@@ -74,7 +74,7 @@ impl Prefix for VarI32 {
 }
 
 impl Prefix for VarU32 {
-    fn encode(size: usize, buf: &mut BytesMut) {
+    fn encode(size: usize, buf: &mut impl Write) {
         let val = size as u32;
         VarU32::new(val).serialize(buf);
     }
@@ -96,11 +96,11 @@ impl<'a, P: Prefix> Str<'a, P> {
 }
 
 impl<'a, P: Prefix> Binary<'a> for Str<'a, P> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let len = self.0.len();
         P::encode(len, buf);
 
-        buf.write_all(self.0.as_bytes()).unwrap()
+        buf.write_all(self.0.as_bytes()).unwrap();
     }
 
     fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
@@ -149,7 +149,7 @@ impl<'a, B: Binary<'a>, P: Prefix> Array<'a, B, P> {
 }
 
 impl<'a, B: Binary<'a>, P: Prefix> Binary<'a> for Array<'a, B, P> {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut impl Write) {
         let len = self.array.len();
         P::encode(len, buf);
 
