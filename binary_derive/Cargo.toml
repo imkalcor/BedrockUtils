@@ -1,0 +1,16 @@
+[package]
+name = "binary_derive"
+version = "0.1.0"
+authors = ["Raptor <93114799+raptor4k@users.noreply.github.com>"]
+description = "A `cargo generate` template for quick-starting a procedural macro crate"
+keywords = ["template", "proc_macro", "procmacro"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+proc-macro2 = "1.0"
+syn = "2.0.28"
+

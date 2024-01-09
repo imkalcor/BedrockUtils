@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "binary",
+    "binary_derive",
+    "binary_test",
+    "commons"
+]

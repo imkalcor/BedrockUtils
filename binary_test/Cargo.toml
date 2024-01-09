@@ -1,0 +1,12 @@
+[package]
+name = "binary_test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+binary_derive = {path = "../binary_derive"}
+binary = {path = "../binary"}
+bytes = {git = "https://github.com/gamesyncltd/bytes"}
+byteorder = "1.4.3"
