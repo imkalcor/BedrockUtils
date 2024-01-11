@@ -1,5 +1,5 @@
 use crate::datatypes::{VarI32, VarU32, I16, I32, U16, U32};
-use crate::Binary;
+use crate::{debug_impl_tt, Binary};
 use byteorder::ByteOrder;
 use bytes::Buf;
 use std::io::{Cursor, Result, Write};
@@ -86,7 +86,7 @@ impl Prefix for VarU32 {
 }
 
 /// Custom String Type with a generic for the Prefix type.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
 pub struct Str<'a, P: Prefix>(&'a str, PhantomData<P>);
 
 impl<'a, P: Prefix> Str<'a, P> {
@@ -125,29 +125,21 @@ impl<'a, P: Prefix> Deref for Str<'a, P> {
 
 /// Custom Array Type with a generic for the Type T that implements the Binary trait (serializable)
 /// and P for the type of prefix for serialization of length.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Array<'a, B: Binary<'a>, P: Prefix> {
-    array: Vec<B>,
-    phantom: PhantomData<P>,
-    _lifetime: &'a (),
-}
+#[derive(Clone, PartialEq, Eq)]
+pub struct Array<'a, B: Binary<'a>, P: Prefix>(Vec<B>, PhantomData<P>, &'a ());
 
 impl<'a, B: Binary<'a>, P: Prefix> Array<'a, B, P> {
     pub fn new(array: Vec<B>) -> Self {
-        Self {
-            array,
-            phantom: PhantomData,
-            _lifetime: &(),
-        }
+        Self(array, PhantomData, &())
     }
 }
 
 impl<'a, B: Binary<'a>, P: Prefix> Binary<'a> for Array<'a, B, P> {
     fn serialize(&self, buf: &mut impl Write) {
-        let len = self.array.len();
+        let len = self.0.len();
         P::encode(len, buf);
 
-        for element in &self.array {
+        for element in &self.0 {
             element.serialize(buf);
         }
     }
@@ -168,74 +160,31 @@ impl<'a, B: Binary<'a>, P: Prefix> Deref for Array<'a, B, P> {
     type Target = Vec<B>;
 
     fn deref(&self) -> &Self::Target {
-        &self.array
+        &self.0
     }
 }
 
 impl<'a, B: Binary<'a>, P: Prefix> DerefMut for Array<'a, B, P> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.array
-    }
-}
-
-/// SizedBytes is a type of Bytes Slice that is created as a reference to an already stored collection of bytes
-/// elsewhere on the heap or the stack. It's main difference from UnsizedBytes is that it encodes a prefix while
-/// the UnsizedBytes do not.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct SizedBytes<'a, const N: usize> {
-    data: &'a [u8],
-}
-
-impl<'a, const N: usize> SizedBytes<'a, N> {
-    pub fn new(data: &'a [u8]) -> Self {
-        Self { data }
-    }
-}
-
-impl<'a, const N: usize> Binary<'a> for SizedBytes<'a, N> {
-    fn serialize(&self, buf: &mut impl Write) {
-        buf.write_all(&self.data).unwrap();
-    }
-
-    fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
-        let start = buf.position() as usize;
-        let end = start + N;
-
-        Ok(Self::new(&buf.get_ref()[start..end]))
-    }
-}
-
-impl<'a, const N: usize> Deref for SizedBytes<'a, N> {
-    type Target = &'a [u8];
-
-    fn deref(&self) -> &Self::Target {
-        &self.data
-    }
-}
-
-impl<'a, const N: usize> DerefMut for SizedBytes<'a, N> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data
+        &mut self.0
     }
 }
 
 /// UnsizedBytes should be used when you want to encode or decode a slice of bytes without any prefix.
 /// It reads the complete remaining portion of the buffer as a slice, so use this only when you want
 /// to read a slice from the end of the buffer that does not contain anything else after the slice.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct UnsizedBytes<'a> {
-    data: &'a [u8],
-}
+#[derive(Clone, Default, PartialEq, Eq)]
+pub struct UnsizedBytes<'a>(&'a [u8]);
 
 impl<'a> UnsizedBytes<'a> {
     pub fn new(data: &'a [u8]) -> Self {
-        Self { data }
+        Self(data)
     }
 }
 
 impl<'a> Binary<'a> for UnsizedBytes<'a> {
     fn serialize(&self, buf: &mut impl Write) {
-        buf.write_all(&self.data).unwrap();
+        buf.write_all(&self.0).unwrap();
     }
 
     fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
@@ -250,12 +199,16 @@ impl<'a> Deref for UnsizedBytes<'a> {
     type Target = &'a [u8];
 
     fn deref(&self) -> &Self::Target {
-        &self.data
+        &self.0
     }
 }
 
 impl<'a> DerefMut for UnsizedBytes<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data
+        &mut self.0
     }
 }
+
+debug_impl_tt!(Str<P: Prefix>);
+debug_impl_tt!(Array<B: Binary<'a>, P: Prefix>);
+debug_impl_tt!(UnsizedBytes);

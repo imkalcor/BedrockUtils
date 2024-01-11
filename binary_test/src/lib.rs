@@ -10,7 +10,7 @@ fn test_conditional() {
     use bytes::BytesMut;
     use std::io::{Cursor, Write};
 
-    #[derive(Binary)]
+    #[derive(Debug, Binary)]
     struct Test {
         #[skip]
         short: U16<LE>,
@@ -47,7 +47,7 @@ fn test_serde() {
 
     env::set_var("RUST_BACKTRACE", "1");
 
-    #[derive(Binary)]
+    #[derive(Debug, Binary)]
     struct Test<'a> {
         byte: U8,
         short: U16<LE>,

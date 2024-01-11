@@ -1,42 +1,57 @@
-use crate::Binary;
+use crate::{debug_impl, Binary};
 use byteorder::ByteOrder;
 use byteorder::{ReadBytesExt, WriteBytesExt};
 use std::io::{Cursor, Error, ErrorKind, Result, Write};
 use std::marker::PhantomData;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct Bool(pub bool);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct U8(pub u8);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct I8(pub i8);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct U16<E: ByteOrder>(pub u16, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct I16<E: ByteOrder>(pub i16, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct U24<E: ByteOrder>(pub u32, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct I24<E: ByteOrder>(pub i32, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct U32<E: ByteOrder>(pub u32, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct I32<E: ByteOrder>(pub i32, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct U64<E: ByteOrder>(pub u64, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct I64<E: ByteOrder>(pub i64, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct F32<E: ByteOrder>(pub f32, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Clone, Default, PartialEq)]
 pub struct F64<E: ByteOrder>(pub f64, PhantomData<E>);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct VarI32(pub i32);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct VarU32(pub u32);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct VarI64(pub i64);
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct VarU64(pub u64);
 
 impl Bool {
@@ -140,6 +155,24 @@ impl VarU64 {
         Self(val)
     }
 }
+
+debug_impl!(U8);
+debug_impl!(I8);
+debug_impl!(Bool);
+debug_impl!(U16<E: ByteOrder>);
+debug_impl!(I16<E: ByteOrder>);
+debug_impl!(U24<E: ByteOrder>);
+debug_impl!(I24<E: ByteOrder>);
+debug_impl!(U32<E: ByteOrder>);
+debug_impl!(I32<E: ByteOrder>);
+debug_impl!(U64<E: ByteOrder>);
+debug_impl!(I64<E: ByteOrder>);
+debug_impl!(F32<E: ByteOrder>);
+debug_impl!(F64<E: ByteOrder>);
+debug_impl!(VarU32);
+debug_impl!(VarI32);
+debug_impl!(VarU64);
+debug_impl!(VarI64);
 
 impl<'a> Binary<'a> for Bool {
     fn serialize(&self, buf: &mut impl Write) {
