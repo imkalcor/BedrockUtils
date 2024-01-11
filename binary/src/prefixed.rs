@@ -125,7 +125,7 @@ impl<'a, P: Prefix> Deref for Str<'a, P> {
 
 /// Custom Array Type with a generic for the Type T that implements the Binary trait (serializable)
 /// and P for the type of prefix for serialization of length.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Array<'a, B: Binary<'a>, P: Prefix> {
     array: Vec<B>,
     phantom: PhantomData<P>,
@@ -181,6 +181,7 @@ impl<'a, B: Binary<'a>, P: Prefix> DerefMut for Array<'a, B, P> {
 /// SizedBytes is a type of Bytes Slice that is created as a reference to an already stored collection of bytes
 /// elsewhere on the heap or the stack. It's main difference from UnsizedBytes is that it encodes a prefix while
 /// the UnsizedBytes do not.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SizedBytes<'a, const N: usize> {
     data: &'a [u8],
 }
@@ -221,6 +222,7 @@ impl<'a, const N: usize> DerefMut for SizedBytes<'a, N> {
 /// UnsizedBytes should be used when you want to encode or decode a slice of bytes without any prefix.
 /// It reads the complete remaining portion of the buffer as a slice, so use this only when you want
 /// to read a slice from the end of the buffer that does not contain anything else after the slice.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct UnsizedBytes<'a> {
     data: &'a [u8],
 }
