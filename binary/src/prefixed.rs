@@ -177,3 +177,40 @@ impl<'a, B: Binary<'a>, P: Prefix> DerefMut for Array<'a, B, P> {
         &mut self.array
     }
 }
+
+pub struct ByteSlice<'a, const N: usize> {
+    data: &'a [u8],
+}
+
+impl<'a, const N: usize> ByteSlice<'a, N> {
+    pub fn new(data: &'a [u8]) -> Self {
+        Self { data }
+    }
+}
+
+impl<'a, const N: usize> Binary<'a> for ByteSlice<'a, N> {
+    fn serialize(&self, buf: &mut impl Write) {
+        buf.write_all(&self.data).unwrap();
+    }
+
+    fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
+        let start = buf.position() as usize;
+        let end = start + N;
+
+        Ok(Self::new(&buf.get_ref()[start..end]))
+    }
+}
+
+impl<'a, const N: usize> Deref for ByteSlice<'a, N> {
+    type Target = &'a [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<'a, const N: usize> DerefMut for ByteSlice<'a, N> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
+}
