@@ -178,17 +178,20 @@ impl<'a, B: Binary<'a>, P: Prefix> DerefMut for Array<'a, B, P> {
     }
 }
 
-pub struct ByteSlice<'a, const N: usize> {
+/// SizedBytes is a type of Bytes Slice that is created as a reference to an already stored collection of bytes
+/// elsewhere on the heap or the stack. It's main difference from UnsizedBytes is that it encodes a prefix while
+/// the UnsizedBytes do not.
+pub struct SizedBytes<'a, const N: usize> {
     data: &'a [u8],
 }
 
-impl<'a, const N: usize> ByteSlice<'a, N> {
+impl<'a, const N: usize> SizedBytes<'a, N> {
     pub fn new(data: &'a [u8]) -> Self {
         Self { data }
     }
 }
 
-impl<'a, const N: usize> Binary<'a> for ByteSlice<'a, N> {
+impl<'a, const N: usize> Binary<'a> for SizedBytes<'a, N> {
     fn serialize(&self, buf: &mut impl Write) {
         buf.write_all(&self.data).unwrap();
     }
@@ -201,7 +204,7 @@ impl<'a, const N: usize> Binary<'a> for ByteSlice<'a, N> {
     }
 }
 
-impl<'a, const N: usize> Deref for ByteSlice<'a, N> {
+impl<'a, const N: usize> Deref for SizedBytes<'a, N> {
     type Target = &'a [u8];
 
     fn deref(&self) -> &Self::Target {
@@ -209,7 +212,47 @@ impl<'a, const N: usize> Deref for ByteSlice<'a, N> {
     }
 }
 
-impl<'a, const N: usize> DerefMut for ByteSlice<'a, N> {
+impl<'a, const N: usize> DerefMut for SizedBytes<'a, N> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
+}
+
+/// UnsizedBytes should be used when you want to encode or decode a slice of bytes without any prefix.
+/// It reads the complete remaining portion of the buffer as a slice, so use this only when you want
+/// to read a slice from the end of the buffer that does not contain anything else after the slice.
+pub struct UnsizedBytes<'a> {
+    data: &'a [u8],
+}
+
+impl<'a> UnsizedBytes<'a> {
+    pub fn new(data: &'a [u8]) -> Self {
+        Self { data }
+    }
+}
+
+impl<'a> Binary<'a> for UnsizedBytes<'a> {
+    fn serialize(&self, buf: &mut impl Write) {
+        buf.write_all(&self.data).unwrap();
+    }
+
+    fn deserialize(buf: &mut Cursor<&'a [u8]>) -> Result<Self> {
+        let start = buf.position() as usize;
+        let end = buf.remaining() + start;
+
+        Ok(Self::new(&buf.get_ref()[start..end]))
+    }
+}
+
+impl<'a> Deref for UnsizedBytes<'a> {
+    type Target = &'a [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<'a> DerefMut for UnsizedBytes<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.data
     }
