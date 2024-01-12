@@ -37,7 +37,7 @@ name = "binary"
 version = "0.1.0"
 dependencies = [
  "byteorder",
- "bytes 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bytes",
 ]
 
 [[package]]
@@ -56,7 +56,7 @@ dependencies = [
  "binary",
  "binary_derive",
  "byteorder",
- "bytes 1.5.0 (git+https://github.com/gamesyncltd/bytes)",
+ "bytes",
 ]
 
 [[package]]
@@ -80,13 +80,7 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 [[package]]
 name = "bytes"
 version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
-
-[[package]]
-name = "bytes"
-version = "1.5.0"
-source = "git+https://github.com/gamesyncltd/bytes#6aeba0ad68780a18662ee00edc6b13dd46ff553d"
+source = "git+https://github.com/CatSniperDev/bytes#0dc1cd191f19f2135b2d58bee147658c1003cd49"
 
 [[package]]
 name = "cc"

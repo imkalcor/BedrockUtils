@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 binary_derive = {path = "../binary_derive"}
 binary = {path = "../binary"}
-bytes = {git = "https://github.com/gamesyncltd/bytes"}
+bytes = {git = "https://github.com/CatSniperDev/bytes"}
 byteorder = "1.4.3"
